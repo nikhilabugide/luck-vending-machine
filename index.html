@@ -144,7 +144,7 @@
     coin.classList.add('coin-fall');
 
     // Start fetching message immediately in background
-    let messagePromise = fetch('https://luck-vending-machine.onrender.com')
+    let messagePromise = fetch('https://luck-vending-machine.onrender.com/get-note')
         .then(res => res.json())
         .catch(() => ({ message: "Server Offline!" }));
 
