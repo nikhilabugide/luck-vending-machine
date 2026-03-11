@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-app.use(cors()); // This allows our orange box to talk to this code
+app.use(cors({origin: 'https://nikhilabugide.github.io'})); // This allows our orange box to talk to this code
 
 // Our "Database" of notes for now
 const luckyNotes = [
