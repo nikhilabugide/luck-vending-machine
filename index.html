@@ -87,7 +87,7 @@
     25% { transform: translate(2px, -2px) rotate(1deg); }
     50% { transform: translate(-2px, 2px) rotate(-1deg); }
     75% { transform: translate(2px, 2px) rotate(0deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(0, 0) rotate(0deg); } 
 }
 
 /* We apply this class using JavaScript */
@@ -144,7 +144,7 @@
     coin.classList.add('coin-fall');
 
     // Start fetching message immediately in background
-    let messagePromise = fetch('http://localhost:5000/get-lucky-note')
+    let messagePromise = fetch('https://luck-vending-machine.onrender.com')
         .then(res => res.json())
         .catch(() => ({ message: "Server Offline!" }));
 
