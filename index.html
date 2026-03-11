@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Magical Lucky Machine</title>
+    <style>
+        :root { 
+            --machine-color: #8a75d6; /* Pastel Pink/Purple */
+            --border-color: #8a75d6; 
+        }
+
+        body { 
+            background: #ededf0; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; overflow: hidden; 
+            font-family: 'Segoe UI', sans-serif;
+            /* CUTE BACKGROUND GRADIENT */
+            background-image: 
+                radial-gradient(circle at 20% 20%, #ffdef2 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, #dff9fb 0%, transparent 40%);
+            position: relative;
+        }
+
+        /* FLOATING EMOJIS & SPARKLES BACKGROUND */
+        .bg-decor {
+            position: absolute; font-size: 24px; animation: float 20s infinite ease-in-out;
+            z-index: 1; opacity: 0.6;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(20deg); }
+        }
+
+        /* 3D MACHINE - CUTE STYLE */
+        .machine { 
+            background: var(--machine-color); width: 320px; padding: 40px 10px; 
+            border-radius: 50px; border: 8px solid var(--border-color); 
+            text-align: center; box-shadow: 0 20px 0 #8974df, 0 30px 50px rgba(0,0,0,0.1);
+            position: relative; z-index: 5;
+        }
+
+        .glass-screen {
+            background: #fff; margin: 0 30px 20px; padding: 15px; border-radius: 20px;
+            border: 4px solid #feca57; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        button { 
+            background: #48dbfb; color: white; border: none; padding: 15px 30px; 
+            border-radius: 50px; cursor: pointer; font-weight: bold; 
+            box-shadow: 0 6px #2e86de; text-transform: uppercase; font-size: 16px;
+        }
+        button:active { transform: translateY(4px); box-shadow: 0 2px #2e86de; }
+
+        .slot { 
+            background: #576574; width: 140px; height: 14px; margin: 25px auto; 
+            border-radius: 10px; border-top: 4px solid #222;
+        }
+
+        /* VINTAGE NOTE */
+        #note-output { 
+            background: #f5ecd9; color: #5d4037; width: 220px; margin: 0 auto; height: 0; 
+            overflow: hidden; opacity: 0; transition: all 0.7s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); font-family: 'Georgia', serif;
+        }
+        .print-now { 
+            height: 160px !important; opacity: 1 !important; padding: 15px 5px; 
+            animation: slideOut 1.7s ease-out; border-top: 8px solid #333;
+        }
+        .scratch-area {
+            background: #5aa2ee; color: #d7e2ee; padding: 25px 10px;
+            margin: 15px 10px; cursor: pointer; border-radius: 10px; font-weight: bold;
+        }
+        .revealed { background: transparent !important; color: #ff6b6b !important; border: none !important; font-style: arial; }
+
+        /* COIN & SPARKLES */
+        .coin { width: 40px; height: 40px; background: #ff9f43; border-radius: 50%; position: absolute; top: -50px; left: 50%; border: 3px solid #fff; display: none; z-index: 10; }
+        .coin-fall { display: block; animation: fall 1s ease-in forwards; }
+        @keyframes fall { 0% { top: -50px; } 100% { top: 180px; opacity: 0; } }
+        
+        .sparkle { position: absolute; width: 10px; height: 10px; border-radius: 50%; pointer-events: none; z-index: 100; animation: fly 1s forwards; }
+        @keyframes fly { to { transform: translate(var(--x), var(--y)); opacity: 0; } }
+        @keyframes slideOut { 0% { height: 0; } 100% { height: 160px; } }
+        /* The Shaking Animation */
+@keyframes shake-vibe {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(2px, -2px) rotate(1deg); }
+    50% { transform: translate(-2px, 2px) rotate(-1deg); }
+    75% { transform: translate(2px, 2px) rotate(0deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* We apply this class using JavaScript */
+.is-shaking {
+    animation: shake-vibe 0.2s linear infinite;
+}
+    </style>
+</head>
+<body>
+
+    <div class="bg-decor" style="top:10%; left:10%;">🍀</div>
+    <div class="bg-decor" style="top:20%; right:15%; animation-delay: 1s;">✨</div>
+    <div class="bg-decor" style="bottom:15%; left:20%; animation-delay: 2s;">⭐</div>
+    <div class="bg-decor" style="bottom:25%; right:10%; animation-delay: 1.5s;">🌸</div>
+    <div class="bg-decor" style="top:50%; left:5%;">✨</div>
+
+    <audio id="snd-coin" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+    <audio id="snd-print" src="https://assets.mixkit.co/active_storage/sfx/1487/1487-preview.mp3"></audio>
+    <audio id="snd-magic" src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3"></audio>
+
+    <div class="coin" id="coin"></div>
+
+    <div class="machine" id="machine-box">
+        <div class="glass-screen">
+            <h2 style="color: #ff6b6b; margin: 0; letter-spacing: 2px;">LUCKY NOTE </h2>
+        </div>
+        
+        <button onclick="playMachine()">Drop Coin </button>
+        <div class="slot"></div>
+
+        <div id="note-output">
+            <div style="font-size: 10px; border-bottom: 1px solid #ddd;">MYSTICAL TICKET</div>
+            <div id="scratch" class="scratch-area" onclick="revealNote()">SCRATCH ME!!!</div>
+        </div>
+    </div>
+
+    <script>
+        let currentMessage = "";
+
+        async function playMachine() {
+    const machine = document.getElementById('machine-box');
+    const coin = document.getElementById('coin');
+    const note = document.getElementById('note-output');
+    const scratch = document.getElementById('scratch');
+
+    // 1. Reset UI
+    note.classList.remove('print-now');
+    scratch.classList.remove('revealed');
+    scratch.innerText = "SCRATCH ME!";
+
+    // 2. Coin Falls (Takes 600ms based on CSS)
+    document.getElementById('snd-coin').currentTime = 0;
+    document.getElementById('snd-coin').play();
+    coin.classList.add('coin-fall');
+
+    // Start fetching message immediately in background
+    let messagePromise = fetch('http://localhost:5000/get-lucky-note')
+        .then(res => res.json())
+        .catch(() => ({ message: "Server Offline!" }));
+
+    // 3. WAIT for coin to finish falling (600ms)
+    setTimeout(async () => {
+        coin.classList.remove('coin-fall');
+        
+        // 4. NOW start the vibration
+        machine.classList.add('is-shaking');
+        const data = await messagePromise;
+        currentMessage = data.message;
+
+        // 5. SHAKE for 1 second, THEN stop and print
+        setTimeout(() => {
+            machine.classList.remove('is-shaking');
+            document.getElementById('snd-print').currentTime = 0;
+            document.getElementById('snd-print').play();
+            
+            // Set message and print paper
+            document.getElementById('scratch').innerText = "SCRATCH ME!";
+            note.classList.add('print-now');
+        }, 1000); 
+
+    }, 600); // This matches the .coin-fall animation time
+}
+
+        function revealNote() {
+            const scratch = document.getElementById('scratch');
+            if(currentMessage && !scratch.classList.contains('revealed')) {
+                document.getElementById('snd-magic').currentTime = 0;
+                document.getElementById('snd-magic').play();
+                scratch.innerText = `✨ ${currentMessage} ✨`;
+                scratch.classList.add('revealed');
+                createSparkles();
+            }
+        }
+
+        function createSparkles() {
+            for(let i=0; i<30; i++) {
+                const s = document.createElement('div');
+                s.className = 'sparkle';
+                s.style.left = '50%'; s.style.top = '50%';
+                const x = (Math.random() - 0.5) * 600 + 'px';
+                const y = (Math.random() - 0.5) * 600 + 'px';
+                s.style.setProperty('--x', x); s.style.setProperty('--y', y);
+                s.style.background = `hsl(${Math.random() * 360}, 100%, 80%)`;
+                document.body.appendChild(s);
+                setTimeout(() => s.remove(), 1000);
+            }
+        }
+    </script>
+</body>
+</html>
